@@ -114,4 +114,15 @@ print(len(faces))"""
 rubiks = rubiks_cube(cube,3)
 camera = EditorCamera()  # <-- This gives mouse/scroll movement
 
+def input(key):
+    if key == 'space':
+        print("Space pressed")
+    if key == 'q':
+        quit()
+    if key == "r":
+        rubiks.rotate_side(0,True)
+
+
+
 app.run()
+
