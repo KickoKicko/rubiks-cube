@@ -34,6 +34,7 @@ class rubiks_cube():
                         colors[5] = color.yellow
                     self.cubes[x][y][z]= cube_piece(cube,(x-1,y-1,z-1),colors)
         self.rotation_arrow = create_arrows(cube)
+        self.update_cubes_array()
     
 
     def rotate_side(self,side,clockwise):
@@ -59,13 +60,15 @@ class rubiks_cube():
                         for z in range(3):
                             if self.cubes[x][y][z].coordinates[2] == -1:
                                 face.append(self.cubes[x][y][z])
+                """for x in face:
+                    print(str(x.coordinates)+"    "+str(x.sides_with_colors))#+"    "+str(x.entities))"""
                 if clockwise:
                     for x in face:
-                        x.coordinates = (x.coordinates[1]*-1,x.coordinates[0],x.coordinates[2])
+                        x.coordinates = (x.coordinates[1],x.coordinates[0]*-1,x.coordinates[2])
                         x.rotate_sides({0:4,1:1,2:0,3:3,4:5,5:2})
                 else:
                     for x in face:
-                        x.coordinates = (x.coordinates[1],x.coordinates[0]*-1,x.coordinates[2])
+                        x.coordinates = (x.coordinates[1]*-1,x.coordinates[0],x.coordinates[2])
                         x.rotate_sides({0:2,1:1,2:5,3:3,4:0,5:4})
             case 2:
                 for x in range(3):
@@ -89,11 +92,11 @@ class rubiks_cube():
                                 face.append(self.cubes[x][y][z])
                 if clockwise:
                     for x in face:
-                        x.coordinates = (x.coordinates[1],x.coordinates[0]*-1,x.coordinates[2])
+                        x.coordinates = (x.coordinates[1]*-1,x.coordinates[0],x.coordinates[2])
                         x.rotate_sides({0:2,1:1,2:5,3:3,4:0,5:4})
                 else:
                     for x in face:
-                        x.coordinates = (x.coordinates[1]*-1,x.coordinates[0],x.coordinates[2])
+                        x.coordinates = (x.coordinates[1],x.coordinates[0]*-1,x.coordinates[2])
                         x.rotate_sides({0:4,1:1,2:0,3:3,4:5,5:2})
             case 4:
                 for x in range(3):
@@ -103,11 +106,11 @@ class rubiks_cube():
                                 face.append(self.cubes[x][y][z])
                 if clockwise:
                     for x in face:
-                        x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
+                        x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
                         x.rotate_sides({0:3,1:0,2:2,3:5,4:4,5:1})
                 else:
                     for x in face:
-                        x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
+                        x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
                         x.rotate_sides({0:1,1:5,2:2,3:0,4:4,5:3})
             case 5:
                 for x in range(3):
@@ -123,9 +126,12 @@ class rubiks_cube():
                     for x in face:
                         x.coordinates = (x.coordinates[2],x.coordinates[1],x.coordinates[0]*-1)
                         x.rotate_sides({0:0,1:2,2:3,3:4,4:1,5:5})
-
-
-
+        self.update_cubes_array()
+        """print("")
+        for x in face:
+            print(str(x.coordinates)+"    "+str(x.sides_with_colors))#+"    "+str(x.entities))
+        print("")"""
+        #self.update_cubes_array()
         self.update_visuals()
         
     
@@ -134,10 +140,27 @@ class rubiks_cube():
             for y in range(3):
                 for z in range(3):
                     cube = self.cubes[x][y][z]
+                    cube.update_entity_position()
                     for i in cube.sides_with_colors:
                         #cube.entities[i].position = ()
-                        cube.update_entity_position()
                         cube.entities[i].color = cube.sides_with_colors[i]
+    
+    def update_cubes_array(self):
+        new_cubes = [[[None for _ in range(3)] for _ in range(3)] for _ in range(3)]
+        for x in range(3):
+            for y in range(3):
+                for z in range(3):
+                    piece = self.cubes[x][y][z]
+                    cx, cy, cz = piece.coordinates
+                    if new_cubes[cx+1][cy+1][cz+1] is not None:
+                        print(f"Duplicate at {(cx, cy, cz)}")
+                    new_cubes[cx+1][cy+1][cz+1] = piece
+        self.cubes = new_cubes
+        for x in range(3):
+            for y in range(3):
+                for z in range(3):
+                    if self.cubes[x][y][z].coordinates != (x-1,y-1,z-1):
+                        print(str(self.cubes[x][y][z].coordinates)+"           "+str((x,y,z)))
 
 
         
