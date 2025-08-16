@@ -78,11 +78,11 @@ class rubiks_cube():
                                 face.append(self.cubes[x][y][z])
                 if clockwise:
                     for x in face:
-                        x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
+                        x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
                         x.rotate_sides({0:1,1:5,2:2,3:0,4:4,5:3})
                 else:
                     for x in face:
-                        x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
+                        x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
                         x.rotate_sides({0:3,1:0,2:2,3:5,4:4,5:1})
             case 3:
                 for x in range(3):
@@ -106,11 +106,11 @@ class rubiks_cube():
                                 face.append(self.cubes[x][y][z])
                 if clockwise:
                     for x in face:
-                        x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
+                        x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
                         x.rotate_sides({0:3,1:0,2:2,3:5,4:4,5:1})
                 else:
                     for x in face:
-                        x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
+                        x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
                         x.rotate_sides({0:1,1:5,2:2,3:0,4:4,5:3})
             case 5:
                 for x in range(3):
