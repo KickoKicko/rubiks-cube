@@ -1,8 +1,3 @@
-import enum
-import copy
-import math
-import numpy
-import time
 from ursina import *
 
 
@@ -43,99 +38,77 @@ class rubiks_cube():
         face = []
         match side:
             case 0:
-                for x in range(3):
-                    for y in range(3):
-                        for z in range(3):
-                            if self.cubes[x][y][z].coordinates[1] == 1:
-                                face.append(self.cubes[x][y][z])
+                clockwise_animation, max_coordinate, max_coordinate_value,axis= clockwise,1,1,'y'
+            case 1:
+                clockwise_animation, max_coordinate, max_coordinate_value,axis= clockwise,2,-1,'z'
+            case 2:
+                clockwise_animation, max_coordinate, max_coordinate_value,axis= not clockwise,0,-1,'x'
+            case 3:
+                clockwise_animation, max_coordinate, max_coordinate_value,axis= not clockwise,2,1,'z'
+            case 4:
+                clockwise_animation, max_coordinate, max_coordinate_value,axis= clockwise,0,1,'x'
+            case 5:
+                clockwise_animation, max_coordinate, max_coordinate_value,axis= not clockwise,1,-1,'y'
+
+        for x in range(3):
+            for y in range(3):
+                for z in range(3):
+                    if self.cubes[x][y][z].coordinates[max_coordinate] == max_coordinate_value:
+                        face.append(self.cubes[x][y][z])
+        self.animate_rotation(face,clockwise_animation,axis)
+
+        match side:
+            case 0:
                 if clockwise:
-                    self.animate_rotation(face,True,'y')
                     for x in face:
                         x.coordinates = (x.coordinates[2],x.coordinates[1],x.coordinates[0]*-1)
                         x.rotate_sides({0:0,1:2,2:3,3:4,4:1,5:5})
-                    
                 else:
-                    self.animate_rotation(face,False,'y')
                     for x in face:
                         x.coordinates = (x.coordinates[2]*-1,x.coordinates[1],x.coordinates[0])
                         x.rotate_sides({0:0,1:4,2:1,3:2,4:3,5:5})
             case 1:
-                for x in range(3):
-                    for y in range(3):
-                        for z in range(3):
-                            if self.cubes[x][y][z].coordinates[2] == -1:
-                                face.append(self.cubes[x][y][z])
                 if clockwise:
-                    self.animate_rotation(face,True,'z')
                     for x in face:
                         x.coordinates = (x.coordinates[1],x.coordinates[0]*-1,x.coordinates[2])
                         x.rotate_sides({0:4,1:1,2:0,3:3,4:5,5:2})
                 else:
-                    self.animate_rotation(face,False,'z')
                     for x in face:
                         x.coordinates = (x.coordinates[1]*-1,x.coordinates[0],x.coordinates[2])
                         x.rotate_sides({0:2,1:1,2:5,3:3,4:0,5:4})
             case 2:
-                for x in range(3):
-                    for y in range(3):
-                        for z in range(3):
-                            if self.cubes[x][y][z].coordinates[0] == -1:
-                                face.append(self.cubes[x][y][z])
                 if clockwise:
-                    self.animate_rotation(face,False,'x')
                     for x in face:
                         x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
                         x.rotate_sides({0:1,1:5,2:2,3:0,4:4,5:3})
                 else:
-                    self.animate_rotation(face,True,'x')
                     for x in face:
                         x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
                         x.rotate_sides({0:3,1:0,2:2,3:5,4:4,5:1})
             case 3:
-                for x in range(3):
-                    for y in range(3):
-                        for z in range(3):
-                            if self.cubes[x][y][z].coordinates[2] == 1:
-                                face.append(self.cubes[x][y][z])
                 if clockwise:
-                    self.animate_rotation(face,False,'z')
                     for x in face:
                         x.coordinates = (x.coordinates[1]*-1,x.coordinates[0],x.coordinates[2])
                         x.rotate_sides({0:2,1:1,2:5,3:3,4:0,5:4})
                 else:
-                    self.animate_rotation(face,True,'z')
                     for x in face:
                         x.coordinates = (x.coordinates[1],x.coordinates[0]*-1,x.coordinates[2])
                         x.rotate_sides({0:4,1:1,2:0,3:3,4:5,5:2})
             case 4:
-                for x in range(3):
-                    for y in range(3):
-                        for z in range(3):
-                            if self.cubes[x][y][z].coordinates[0] == 1:
-                                face.append(self.cubes[x][y][z])
                 if clockwise:
-                    self.animate_rotation(face,True,'x')
                     for x in face:
                         x.coordinates = (x.coordinates[0],x.coordinates[2]*-1,x.coordinates[1])
                         x.rotate_sides({0:3,1:0,2:2,3:5,4:4,5:1})
                 else:
-                    self.animate_rotation(face,False,'x')
                     for x in face:
                         x.coordinates = (x.coordinates[0],x.coordinates[2],x.coordinates[1]*-1)
                         x.rotate_sides({0:1,1:5,2:2,3:0,4:4,5:3})
             case 5:
-                for x in range(3):
-                    for y in range(3):
-                        for z in range(3):
-                            if self.cubes[x][y][z].coordinates[1] == -1:
-                                face.append(self.cubes[x][y][z])
                 if clockwise:
-                    self.animate_rotation(face,False,'y')
                     for x in face:
                         x.coordinates = (x.coordinates[2]*-1,x.coordinates[1],x.coordinates[0])
                         x.rotate_sides({0:0,1:4,2:1,3:2,4:3,5:5})
                 else:
-                    self.animate_rotation(face,True,'y')
                     for x in face:
                         x.coordinates = (x.coordinates[2],x.coordinates[1],x.coordinates[0]*-1)
                         x.rotate_sides({0:0,1:2,2:3,3:4,4:1,5:5})
@@ -153,8 +126,7 @@ class rubiks_cube():
 
     
     def animate_rotation(self, face, clockwise,axis):
-        pivot = Entity(postion=(0,1.05,0))
-
+        pivot = Entity()
         for x in face:
             for cubelet in x.entities:
                 x.entities[cubelet].parent = pivot
@@ -167,7 +139,6 @@ class rubiks_cube():
             pivot.animate_rotation_y(angle, duration=0.3,curve=curve.linear)
         elif axis == 'z':
             pivot.animate_rotation_z(angle, duration=0.3,curve=curve.linear)
-
 
         def finalize():
             for x in face:
