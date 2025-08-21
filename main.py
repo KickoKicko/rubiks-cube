@@ -147,10 +147,14 @@ def input(key):
         print("Space pressed")
     if key == 'q':
         quit()
-    if key == "r":
-        rubiks.rotate_side(0,True)
-    if key == "t":
-        rubiks.rotate_side(0,False)
+    if key == "c":
+        if rubiks.check_solved():
+            print("solved")
+        else:
+            print("not solved")
+    if key == "s":
+        rubiks.solve()
+
 
 rubiks.rotation_arrow[0].on_click=rotate00
 rubiks.rotation_arrow[1].on_click=rotate01
