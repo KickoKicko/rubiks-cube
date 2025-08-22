@@ -154,6 +154,8 @@ def input(key):
             print("not solved")
     if key == "s":
         rubiks.solve()
+    if key == "r":
+        rubiks.shuffle(10)
 
 
 rubiks.rotation_arrow[0].on_click=rotate00

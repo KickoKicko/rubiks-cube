@@ -1,6 +1,7 @@
 from ursina import *
 import time
 import copy
+import random
 
 """class Color(enum.Enum):
     #WHITE=0 # UP
@@ -216,6 +217,12 @@ class rubiks_cube():
             print(amount)
             return False
         return True
+    
+    def shuffle(self, amount):
+        list = []
+        for i in range(amount):
+            list.append((random.randint(0,5),bool(random.randint(0,1))))
+        self.play_solution(list)
 
 
 
