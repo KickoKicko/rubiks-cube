@@ -4,29 +4,29 @@ from rubiks_cube import rubiks_cube
 
 
 def rotate00():
-    rubiks.rotate_side(0,False)
+    rubiks.rotate_side(0,False,True)
 def rotate01():
-    rubiks.rotate_side(0,True)
+    rubiks.rotate_side(0,True,True)
 def rotate10():
-    rubiks.rotate_side(1,False)
+    rubiks.rotate_side(1,False,True)
 def rotate11():
-    rubiks.rotate_side(1,True)
+    rubiks.rotate_side(1,True,True)
 def rotate20():
-    rubiks.rotate_side(2,False)
+    rubiks.rotate_side(2,False,True)
 def rotate21():
-    rubiks.rotate_side(2,True)
+    rubiks.rotate_side(2,True,True)
 def rotate30():
-    rubiks.rotate_side(3,False)
+    rubiks.rotate_side(3,False,True)
 def rotate31():
-    rubiks.rotate_side(3,True)
+    rubiks.rotate_side(3,True,True)
 def rotate40():
-    rubiks.rotate_side(4,False)
+    rubiks.rotate_side(4,False,True)
 def rotate41():
-    rubiks.rotate_side(4,True)
+    rubiks.rotate_side(4,True,True)
 def rotate50():
-    rubiks.rotate_side(5,False)
+    rubiks.rotate_side(5,False,True)
 def rotate51():
-    rubiks.rotate_side(5,True)
+    rubiks.rotate_side(5,True,True)
 
 app = Ursina()
 

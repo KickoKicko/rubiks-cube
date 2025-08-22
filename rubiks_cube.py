@@ -1,5 +1,6 @@
 from ursina import *
-
+import time
+import copy
 
 """class Color(enum.Enum):
     #WHITE=0 # UP
@@ -30,12 +31,11 @@ class rubiks_cube():
                         colors[4] = color.blue
                     if y == 0:
                         colors[5] = color.yellow
-                    self.cubes[x][y][z]= cube_piece(cube,(x-1,y-1,z-1),colors)
+                    self.cubes[x][y][z]= cube_piece((x-1,y-1,z-1),colors,cube=cube)
         self.rotation_arrow = create_arrows(cube)
     
 
-    def rotate_side(self,side,clockwise):
-        face = []
+    def rotate_side(self,side,clockwise,animation):
         match side:
             case 0:
                 clockwise_animation, max_coordinate, max_coordinate_value,axis= clockwise,1,1,'y'
@@ -61,16 +61,16 @@ class rubiks_cube():
                 clockwise_animation, max_coordinate, max_coordinate_value,axis= not clockwise,1,-1,'y'
                 if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:0,1:4,2:1,3:2,4:3,5:5}, (2,1,0), (-1,1,1)
                 else: side_mapping, coordinate_indexes, axis_direction = {0:0,1:2,2:3,3:4,4:1,5:5}, (2,1,0),(1,1,-1)
-
+        face = []
         for x in range(3):
             for y in range(3):
                 for z in range(3):
                     if self.cubes[x][y][z].coordinates[max_coordinate] == max_coordinate_value:
                         face.append(self.cubes[x][y][z])
-        self.animate_rotation(face,clockwise_animation,axis)
+        if animation: self.animate_rotation(face,clockwise_animation,axis)
         for x in face:
             x.coordinates = (x.coordinates[coordinate_indexes[0]]*axis_direction[0],x.coordinates[coordinate_indexes[1]]*axis_direction[1],x.coordinates[coordinate_indexes[2]]*axis_direction[2])
-            x.rotate_sides(side_mapping)
+            x.rotate_sides(side_mapping,True)
 
     
     def animate_rotation(self, face, clockwise,axis):
@@ -97,44 +97,97 @@ class rubiks_cube():
         invoke(finalize, delay=0.23)
     
     def solve(self):
+        cube_copy= [[[None for _ in range(3)] for _ in range(3)] for _ in range(3)]
+        for x in range(3):
+            for y in range(3):
+                for z in range(3):
+                    cube_copy[x][y][z] = cube_piece(self.cubes[x][y][z].coordinates,self.cubes[x][y][z].sides_with_colors)
+
         moves_queue = []
-        self.white_cross(moves_queue)
+        self.white_cross(moves_queue,cube_copy)
         self.play_solution(moves_queue)
-        print()
     
     def play_solution(self, moves, delay=0.4):
         if not moves:
-            return  # finished
+            return
         move = moves.pop(0)
-        self.rotate_side(move[0],move[1])  # your rotate/animation function
+        self.rotate_side(move[0],move[1],True)
         invoke(self.play_solution, moves, delay=delay)
     
-    def white_cross(self,moves_queue):
+    def white_cross(self,moves_queue,cube_copy):
         if self.cubes[1][2][0].sides_with_colors == {0:color.white,1:color.red}:
             return True
         else:
-            self.move_white_cross_piece(moves_queue,self.cubes[1][2][0],(0,1,-1))
-            #self.move_white_cross_piece(moves_queue,self.cubes[0][2][1],(-1,1,0))
-            print("not yet")
+            self.move_white_cross_piece(moves_queue,cube_copy,cube_copy[1][2][0],(0,1,-1))
+            self.move_white_cross_piece(moves_queue,cube_copy,cube_copy[0][2][1],(-1,1,0))
+            self.move_white_cross_piece(moves_queue,cube_copy,cube_copy[1][2][2],(0,1,1))
+            self.move_white_cross_piece(moves_queue,cube_copy,cube_copy[2][2][1],(1,1,0))
             return False
-        print
     
-    def move_white_cross_piece(self,moves_queue, piece, destination):
+    def move_white_cross_piece(self,moves_queue,cube_copy, piece, destination):
         if piece.coordinates == destination:
             return
         if piece.coordinates[1] == 1:
             for side in piece.sides_with_colors:
                 if side != 0:
-                    #invoke(self.rotate_side, side,True, delay=0.4)
-                    #invoke(self.rotate_side, side,True, delay=0.4)
-                    moves_queue.append((side,True))
-                    moves_queue.append((side,True))
-                    """if piece.coordinates[0] != destination[0] and piece.coordinates[2] != destination[2]:
-                        moves_queue.append((5,True))
-                        moves_queue.append((5,True))"""
+                    solve_rotate(moves_queue,cube_copy,side,True)
+                    solve_rotate(moves_queue,cube_copy,side,True)
+        elif piece.coordinates[1] == 0:
+            if 1 in piece.sides_with_colors and 2 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,2,False)
+            elif 2 in piece.sides_with_colors and 3 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,3,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,3,False)
+            elif 3 in piece.sides_with_colors and 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,4,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,4,False)
+            elif 1 in piece.sides_with_colors and 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,1,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,1,False)
 
+        # Now the white piece is in the bottom layer
 
-        print
+        if piece.coordinates[0] != destination[0] and piece.coordinates[2] != destination[2]:
+            if piece.coordinates[0] == destination[2] and piece.coordinates[2] *-1 == destination[0]: solve_rotate(moves_queue,cube_copy,5,True)
+            else: solve_rotate(moves_queue,cube_copy,5,False)  
+        elif piece.coordinates[0] != destination[0] or piece.coordinates[2] != destination[2]:
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+        
+        for side in piece.sides_with_colors:
+            if side != 5:
+                solve_rotate(moves_queue,cube_copy,side,True)
+                solve_rotate(moves_queue,cube_copy,side,True)
+        
+        # Now in the right position
+
+        if piece.sides_with_colors[0] != color.white:
+            if 1 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,1,True)
+                solve_rotate(moves_queue,cube_copy,0,False)
+                solve_rotate(moves_queue,cube_copy,4,True)
+                solve_rotate(moves_queue,cube_copy,0,True)
+            elif 2 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,0,False)
+                solve_rotate(moves_queue,cube_copy,1,True)
+                solve_rotate(moves_queue,cube_copy,0,True)
+            elif 3 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,3,True)
+                solve_rotate(moves_queue,cube_copy,0,False)
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,0,True)
+            elif 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,4,True)
+                solve_rotate(moves_queue,cube_copy,0,False)
+                solve_rotate(moves_queue,cube_copy,3,True)
+                solve_rotate(moves_queue,cube_copy,0,True)
+
 
 
     
@@ -157,9 +210,6 @@ class rubiks_cube():
                     if y == 0:
                         colors[5] = color.yellow
                     if self.cubes[x][y][z].sides_with_colors != colors:
-                        #print(self.cubes[x][y][z].coordinates)
-                        #print(self.cubes[x][y][z].sides_with_colors)
-                        #print(colors)
                         amount += 1
                         #return False
         if amount != 0:
@@ -175,12 +225,13 @@ class rubiks_cube():
 
 class cube_piece():
 
-    def __init__(self,cube,coordinates,sides_with_colors):
+    def __init__(self,coordinates,sides_with_colors,cube=None):
         self.coordinates = coordinates  # a vec3 like (x,y,z)
         self.sides_with_colors=sides_with_colors
         self.entities={}
-        for side in sides_with_colors:
-            self.entities[side] = create_entity(cube,coordinates,side,sides_with_colors[side])
+        if cube != None:
+            for side in sides_with_colors:
+                self.entities[side] = create_entity(cube,coordinates,side,sides_with_colors[side])
 
     
     def update_entity_position(self):
@@ -211,31 +262,31 @@ class cube_piece():
                     self.entities[side].rotation_x=-90
                     self.entities[side].rotation_y=0
     
-    def rotate_sides(self,rotation_dict):
+    def rotate_sides(self,rotation_dict,have_entities):
         new_sides_with_colors={}
-        new_entities={}
+        if have_entities: new_entities={}
         for x in self.sides_with_colors:
             if x == 0:
                 new_sides_with_colors[rotation_dict[x]]=self.sides_with_colors[x]
-                new_entities[rotation_dict[x]]=self.entities[x]
+                if have_entities: new_entities[rotation_dict[x]]=self.entities[x]
             elif x ==1:
                 new_sides_with_colors[rotation_dict[x]]=self.sides_with_colors[x]
-                new_entities[rotation_dict[x]]=self.entities[x]
+                if have_entities: new_entities[rotation_dict[x]]=self.entities[x]
             elif x ==2:
                 new_sides_with_colors[rotation_dict[x]]=self.sides_with_colors[x]
-                new_entities[rotation_dict[x]]=self.entities[x]
+                if have_entities: new_entities[rotation_dict[x]]=self.entities[x]
             elif x ==3:
                 new_sides_with_colors[rotation_dict[x]]=self.sides_with_colors[x]
-                new_entities[rotation_dict[x]]=self.entities[x]
+                if have_entities: new_entities[rotation_dict[x]]=self.entities[x]
             elif x ==4:
                 new_sides_with_colors[rotation_dict[x]]=self.sides_with_colors[x]
-                new_entities[rotation_dict[x]]=self.entities[x]
+                if have_entities: new_entities[rotation_dict[x]]=self.entities[x]
             elif x ==5:
                 new_sides_with_colors[rotation_dict[x]]=self.sides_with_colors[x]
-                new_entities[rotation_dict[x]]=self.entities[x]
+                if have_entities: new_entities[rotation_dict[x]]=self.entities[x]
         
         self.sides_with_colors=new_sides_with_colors.copy()
-        self.entities=new_entities.copy()
+        if have_entities: self.entities=new_entities.copy()
 
 
 
@@ -281,3 +332,55 @@ def create_arrows(cube):
 
     return arrow_list
 
+
+def opposite_side(side):
+    match side:
+        case 0:
+            return 5
+        case 1:
+            return 3
+        case 2:
+            return 4
+        case 3:
+            return 1
+        case 4:
+            return 2
+        case 5:
+            return 0
+            
+
+def solve_rotate(moves_queue,cube_copy, side, clockwise):
+    match side:
+        case 0:
+            max_coordinate, max_coordinate_value= 1,1
+            if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:0,1:2,2:3,3:4,4:1,5:5}, (2,1,0), (1,1,-1)
+            else: side_mapping, coordinate_indexes, axis_direction = {0:0,1:4,2:1,3:2,4:3,5:5}, (2,1,0),(-1,1,1)
+        case 1:
+            max_coordinate, max_coordinate_value= 2,-1
+            if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:4,1:1,2:0,3:3,4:5,5:2}, (1,0,2), (1,-1,1)
+            else: side_mapping, coordinate_indexes, axis_direction = {0:2,1:1,2:5,3:3,4:0,5:4}, (1,0,2),(-1,1,1)
+        case 2:
+            max_coordinate, max_coordinate_value= 0,-1
+            if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:1,1:5,2:2,3:0,4:4,5:3}, (0,2,1), (1,1,-1)
+            else: side_mapping, coordinate_indexes, axis_direction = {0:3,1:0,2:2,3:5,4:4,5:1}, (0,2,1),(1,-1,1)
+        case 3:
+            max_coordinate, max_coordinate_value= 2,1
+            if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:2,1:1,2:5,3:3,4:0,5:4}, (1,0,2), (-1,1,1)
+            else: side_mapping, coordinate_indexes, axis_direction = {0:4,1:1,2:0,3:3,4:5,5:2}, (1,0,2),(1,-1,1)
+        case 4:
+            max_coordinate, max_coordinate_value= 0,1
+            if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:3,1:0,2:2,3:5,4:4,5:1}, (0,2,1), (1,-1,1)
+            else: side_mapping, coordinate_indexes, axis_direction = {0:1,1:5,2:2,3:0,4:4,5:3}, (0,2,1),(1,1,-1)
+        case 5:
+            max_coordinate, max_coordinate_value= 1,-1
+            if clockwise: side_mapping, coordinate_indexes, axis_direction = {0:0,1:4,2:1,3:2,4:3,5:5}, (2,1,0), (-1,1,1)
+            else: side_mapping, coordinate_indexes, axis_direction = {0:0,1:2,2:3,3:4,4:1,5:5}, (2,1,0),(1,1,-1)
+    for x in range(3):
+        for y in range(3):
+            for z in range(3):
+                if cube_copy[x][y][z].coordinates[max_coordinate] == max_coordinate_value:
+                    cube_copy[x][y][z].coordinates = (cube_copy[x][y][z].coordinates[coordinate_indexes[0]]*axis_direction[0],cube_copy[x][y][z].coordinates[coordinate_indexes[1]]*axis_direction[1],cube_copy[x][y][z].coordinates[coordinate_indexes[2]]*axis_direction[2])
+                    cube_copy[x][y][z].rotate_sides(side_mapping,False)
+
+    moves_queue.append((side,clockwise))
+    
