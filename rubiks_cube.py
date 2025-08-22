@@ -106,6 +106,7 @@ class rubiks_cube():
 
         moves_queue = []
         self.white_cross(moves_queue,cube_copy)
+        self.white_corners(moves_queue,cube_copy)
         self.play_solution(moves_queue)
     
     def play_solution(self, moves, delay=0.4):
@@ -116,7 +117,7 @@ class rubiks_cube():
         invoke(self.play_solution, moves, delay=delay)
     
     def white_cross(self,moves_queue,cube_copy):
-        if self.cubes[1][2][0].sides_with_colors == {0:color.white,1:color.red}:
+        if self.cubes[1][2][0].sides_with_colors == {0:color.white,1:color.red} and self.cubes[0][2][1].sides_with_colors == {0:color.white,2:color.green}:#extend this
             return True
         else:
             self.move_white_cross_piece(moves_queue,cube_copy,cube_copy[1][2][0],(0,1,-1))
@@ -188,6 +189,63 @@ class rubiks_cube():
                 solve_rotate(moves_queue,cube_copy,0,False)
                 solve_rotate(moves_queue,cube_copy,3,True)
                 solve_rotate(moves_queue,cube_copy,0,True)
+    
+    def white_corners(self,moves_queue,cube_copy):
+        print()
+        self.move_white_corners_piece(moves_queue,cube_copy,cube_copy[0][2][0],(-1,1,-1))
+        self.move_white_corners_piece(moves_queue,cube_copy,cube_copy[0][2][2],(-1,1,1))
+        self.move_white_corners_piece(moves_queue,cube_copy,cube_copy[2][2][2],(1,1,1))
+        self.move_white_corners_piece(moves_queue,cube_copy,cube_copy[2][2][0],(1,1,-1))
+
+
+    def move_white_corners_piece(self,moves_queue,cube_copy, piece, destination):
+        if piece.coordinates == destination and piece.sides_with_colors[0] == color.white:
+            return
+        if piece.coordinates[1] == 1:
+            if 1 in piece.sides_with_colors and 2 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,2,False)
+            elif 2 in piece.sides_with_colors and 3 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,3,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,3,False)
+            elif 3 in piece.sides_with_colors and 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,4,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,4,False)
+            elif 1 in piece.sides_with_colors and 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,1,True)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,1,False)
+        
+        # Now in the bottom layer
+            
+        if piece.coordinates[0] != destination[0] and piece.coordinates[2] != destination[2]:
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+        elif piece.coordinates[0] != destination[0] or piece.coordinates[2] != destination[2]:
+            if piece.coordinates[0] == destination[2] and piece.coordinates[2] *-1 == destination[0]: solve_rotate(moves_queue,cube_copy,5,True)
+            else: solve_rotate(moves_queue,cube_copy,5,False) 
+
+        # Now in the right corner of the bottom layer
+        if 1 in piece.sides_with_colors and 2 in piece.sides_with_colors:right_side=1
+        elif 2 in piece.sides_with_colors and 3 in piece.sides_with_colors:right_side=2
+        elif 3 in piece.sides_with_colors and 4 in piece.sides_with_colors:right_side=3
+        elif 1 in piece.sides_with_colors and 4 in piece.sides_with_colors:right_side=4
+
+        if piece.sides_with_colors[right_side] == color.white:loops = 1
+        elif piece.sides_with_colors[5] == color.white:loops =3
+        else:loops =5
+
+        for i in range(loops):
+            solve_rotate(moves_queue,cube_copy,right_side,False)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,right_side,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+        
+
+
 
 
 

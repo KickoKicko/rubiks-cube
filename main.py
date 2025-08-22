@@ -155,7 +155,7 @@ def input(key):
     if key == "s":
         rubiks.solve()
     if key == "r":
-        rubiks.shuffle(10)
+        rubiks.shuffle(20)
 
 
 rubiks.rotation_arrow[0].on_click=rotate00
