@@ -1,16 +1,7 @@
 from ursina import *
-import time
+#import time
 import copy
 import random
-
-"""class Color(enum.Enum):
-    #WHITE=0 # UP
-    color.white=0 # UP
-    RED=1 # FORWARD
-    GREED=2 # LEFT
-    ORANGE=3 # BACK
-    BLUE=4 #RIGHT
-    YELLOW=5 #DOWN"""
 
 class rubiks_cube():
 
@@ -107,6 +98,7 @@ class rubiks_cube():
         moves_queue = []
         self.white_cross(moves_queue,cube_copy)
         self.white_corners(moves_queue,cube_copy)
+        self.second_layer(moves_queue,cube_copy)
         self.play_solution(moves_queue)
     
     def play_solution(self, moves, delay=0.4):
@@ -117,7 +109,7 @@ class rubiks_cube():
         invoke(self.play_solution, moves, delay=delay)
     
     def white_cross(self,moves_queue,cube_copy):
-        if self.cubes[1][2][0].sides_with_colors == {0:color.white,1:color.red} and self.cubes[0][2][1].sides_with_colors == {0:color.white,2:color.green}:#extend this
+        if self.cubes[1][2][0].sides_with_colors == {0:color.white,1:color.red} and self.cubes[0][2][1].sides_with_colors == {0:color.white,2:color.green} and self.cubes[1][2][2].sides_with_colors == {0:color.white,3:color.orange} and self.cubes[2][2][1].sides_with_colors == {0:color.white,4:color.blue}:
             return True
         else:
             self.move_white_cross_piece(moves_queue,cube_copy,cube_copy[1][2][0],(0,1,-1))
@@ -127,7 +119,7 @@ class rubiks_cube():
             return False
     
     def move_white_cross_piece(self,moves_queue,cube_copy, piece, destination):
-        if piece.coordinates == destination:
+        if piece.coordinates == destination and piece.sides_with_colors[0] == color.white:
             return
         if piece.coordinates[1] == 1:
             for side in piece.sides_with_colors:
@@ -244,6 +236,112 @@ class rubiks_cube():
             solve_rotate(moves_queue,cube_copy,right_side,True)
             solve_rotate(moves_queue,cube_copy,5,True)
         
+
+    def second_layer(self,moves_queue,cube_copy):
+        self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[0][1][0],(-1,0,-1))
+        self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[0][1][2],(-1,0,1))
+        self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[2][1][2],(1,0,1))
+        #self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[2][1][0],(1,0,-1))
+
+    def move_second_layer_piece(self,moves_queue,cube_copy, piece, destination):
+        if piece.coordinates == destination:
+            return # need to add the switch here
+        
+        if piece.coordinates[1] == 0:
+            if 1 in piece.sides_with_colors and 2 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,2,False)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,1,False)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,1,True)
+            elif 2 in piece.sides_with_colors and 3 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,3,True)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,3,False)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,2,False)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,2,True)
+            elif 3 in piece.sides_with_colors and 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,4,True)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,4,False)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,3,False)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,3,True)
+            elif 1 in piece.sides_with_colors and 4 in piece.sides_with_colors:
+                solve_rotate(moves_queue,cube_copy,1,True)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,1,False)
+                solve_rotate(moves_queue,cube_copy,5,False)
+                solve_rotate(moves_queue,cube_copy,4,False)
+                solve_rotate(moves_queue,cube_copy,5,True)
+                solve_rotate(moves_queue,cube_copy,4,True)
+        
+        for side in piece.sides_with_colors:
+            if side !=5:
+                right_color = piece.sides_with_colors[side]
+        match right_color:
+            case color.red:right_side = 1
+            case color.green:right_side = 2
+            case color.orange:right_side = 3
+            case color.blue:right_side = 4
+
+        while right_side not in piece.sides_with_colors:
+            solve_rotate(moves_queue,cube_copy,5,True)
+        
+        for side in piece.sides_with_colors:
+            if side != right_side:
+                other_color = piece.sides_with_colors[side]
+        match other_color:
+            case color.red:other_side = 1
+            case color.green:other_side = 2
+            case color.orange:other_side = 3
+            case color.blue:other_side = 4
+        """if right_side == 1 and other_side == 4: # Need to implement this "edge case"
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,other_side,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,other_side,True)
+
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,right_side,True)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,right_side,False)
+        elif right_side == 4 and other_side == 1:
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,other_side,True)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,other_side,False)
+
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,right_side,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,right_side,True)"""
+        if right_side>other_side:
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,other_side,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,other_side,True)
+
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,right_side,True)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,right_side,False)
+        else:
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,other_side,True)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,other_side,False)
+
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,right_side,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,right_side,True)
+
 
 
 
