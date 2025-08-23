@@ -74,11 +74,11 @@ class rubiks_cube():
         if clockwise: angle = 90
         else: angle = -90
         if axis == 'x':
-            pivot.animate_rotation_x(angle, duration=0.2,curve=curve.linear)
+            pivot.animate_rotation_x(angle, duration=0.15,curve=curve.linear)
         elif axis == 'y':
-            pivot.animate_rotation_y(angle, duration=0.2,curve=curve.linear)
+            pivot.animate_rotation_y(angle, duration=0.15,curve=curve.linear)
         elif axis == 'z':
-            pivot.animate_rotation_z(angle, duration=0.2,curve=curve.linear)
+            pivot.animate_rotation_z(angle, duration=0.15,curve=curve.linear)
 
         def finalize():
             for x in face:
@@ -241,11 +241,11 @@ class rubiks_cube():
         self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[0][1][0],(-1,0,-1))
         self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[0][1][2],(-1,0,1))
         self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[2][1][2],(1,0,1))
-        #self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[2][1][0],(1,0,-1))
+        self.move_second_layer_piece(moves_queue,cube_copy,cube_copy[2][1][0],(1,0,-1))
 
     def move_second_layer_piece(self,moves_queue,cube_copy, piece, destination):
-        if piece.coordinates == destination:
-            return # need to add the switch here
+        #if piece.coordinates == destination: # add the return early if already correct here
+            #return
         
         if piece.coordinates[1] == 0:
             if 1 in piece.sides_with_colors and 2 in piece.sides_with_colors:
@@ -301,7 +301,7 @@ class rubiks_cube():
             case color.green:other_side = 2
             case color.orange:other_side = 3
             case color.blue:other_side = 4
-        """if right_side == 1 and other_side == 4: # Need to implement this "edge case"
+        if right_side == 1 and other_side == 4: # Need to implement this "edge case"
             solve_rotate(moves_queue,cube_copy,5,False)
             solve_rotate(moves_queue,cube_copy,other_side,False)
             solve_rotate(moves_queue,cube_copy,5,True)
@@ -320,8 +320,8 @@ class rubiks_cube():
             solve_rotate(moves_queue,cube_copy,5,False)
             solve_rotate(moves_queue,cube_copy,right_side,False)
             solve_rotate(moves_queue,cube_copy,5,True)
-            solve_rotate(moves_queue,cube_copy,right_side,True)"""
-        if right_side>other_side:
+            solve_rotate(moves_queue,cube_copy,right_side,True)
+        elif right_side>other_side:
             solve_rotate(moves_queue,cube_copy,5,False)
             solve_rotate(moves_queue,cube_copy,other_side,False)
             solve_rotate(moves_queue,cube_copy,5,True)
