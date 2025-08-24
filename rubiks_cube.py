@@ -100,6 +100,7 @@ class rubiks_cube():
         self.white_corners(moves_queue,cube_copy)
         self.second_layer(moves_queue,cube_copy)
         self.yellow_cross(moves_queue,cube_copy)
+        self.yellow_edges(moves_queue,cube_copy)
         self.play_solution(moves_queue)
     
     def play_solution(self, moves, delay=0.4):
@@ -347,11 +348,9 @@ class rubiks_cube():
     def yellow_cross(self,moves_queue,cube_copy):
         cubes=[cube_copy[1][0][0],cube_copy[0][0][1],cube_copy[1][0][2],cube_copy[2][0][1]]
         cubes=[cube for cube in cubes if cube.sides_with_colors[5] == color.yellow]
-        if len(cubes)==4:
-            print("cross already done")
+        if len(cubes)==4: # Cross already done
             return
-        if len(cubes)==0:
-            print("Only one square")
+        if len(cubes)==0: # Only one square
             solve_rotate(moves_queue,cube_copy,1,True)
             solve_rotate(moves_queue,cube_copy,2,True)
             solve_rotate(moves_queue,cube_copy,5,True)
@@ -372,9 +371,7 @@ class rubiks_cube():
             solve_rotate(moves_queue,cube_copy,2,False)
             solve_rotate(moves_queue,cube_copy,5,False)
             solve_rotate(moves_queue,cube_copy,1,False)
-            return
-        elif cubes[0].coordinates[0] != cubes[1].coordinates[0] and cubes[0].coordinates[2] != cubes[1].coordinates[2]:
-            print("L squares")
+        elif cubes[0].coordinates[0] != cubes[1].coordinates[0] and cubes[0].coordinates[2] != cubes[1].coordinates[2]:# L squares
             sides = []
             for cube in cubes:
                 for side in cube.sides_with_colors:
@@ -389,8 +386,7 @@ class rubiks_cube():
             solve_rotate(moves_queue,cube_copy,5,False)
             solve_rotate(moves_queue,cube_copy,sides[1],False)
             solve_rotate(moves_queue,cube_copy,sides[0],False)
-        else:
-            print("Line of squares")
+        else: #Line of squares
             for x in cubes[0].sides_with_colors:
                 if x != 5:
                     front_side = x
@@ -403,6 +399,45 @@ class rubiks_cube():
             solve_rotate(moves_queue,cube_copy,5,False)
             solve_rotate(moves_queue,cube_copy,left_side,False)
 
+    def yellow_edges(self,moves_queue,cube_copy):
+        self.move_yellow_edge_piece(moves_queue,cube_copy,cube_copy[1][0][0],(0,-1,-1))
+        self.move_yellow_edge_piece(moves_queue,cube_copy,cube_copy[0][0][1],(-1,-1,0))
+        self.move_yellow_edge_piece(moves_queue,cube_copy,cube_copy[1][0][2],(0,-1,1))
+        self.move_yellow_edge_piece(moves_queue,cube_copy,cube_copy[2][0][1],(1,-1,0))
+    
+    def move_yellow_edge_piece(self,moves_queue,cube_copy, piece, destination):
+        if piece.coordinates == destination: 
+            return
+        if piece.coordinates[0] == destination[0] or piece.coordinates[2] == destination[2]: # Across
+            for s in piece.sides_with_colors:
+                if s != 5: side = s 
+            if side == 4: side = 1
+            else: side = side+1
+            loops=2
+        else: # Just one turn
+            for s in piece.sides_with_colors:
+                if s != 5: side = s 
+            if piece.coordinates[0]==destination[2] and piece.coordinates[2]==destination[0]*-1: # Need one clockwise turn
+                if side == 4: side = 1
+                else: side = side+1
+            else:# Need one non-clockwise turn
+                if side == 3: side = 1
+                elif side == 4: side = 2
+                else: side = side+2
+            loops = 1
+        
+        for i in range(loops):
+            solve_rotate(moves_queue,cube_copy,side,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,side,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,side,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,side,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            if side == 1: side = 4
+            else: side = side-1
 
 
 
