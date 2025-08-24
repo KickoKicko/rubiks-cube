@@ -99,6 +99,7 @@ class rubiks_cube():
         self.white_cross(moves_queue,cube_copy)
         self.white_corners(moves_queue,cube_copy)
         self.second_layer(moves_queue,cube_copy)
+        self.yellow_cross(moves_queue,cube_copy)
         self.play_solution(moves_queue)
     
     def play_solution(self, moves, delay=0.4):
@@ -342,6 +343,65 @@ class rubiks_cube():
             solve_rotate(moves_queue,cube_copy,5,True)
             solve_rotate(moves_queue,cube_copy,right_side,True)
 
+
+    def yellow_cross(self,moves_queue,cube_copy):
+        cubes=[cube_copy[1][0][0],cube_copy[0][0][1],cube_copy[1][0][2],cube_copy[2][0][1]]
+        cubes=[cube for cube in cubes if cube.sides_with_colors[5] == color.yellow]
+        if len(cubes)==4:
+            print("cross already done")
+            return
+        if len(cubes)==0:
+            print("Only one square")
+            solve_rotate(moves_queue,cube_copy,1,True)
+            solve_rotate(moves_queue,cube_copy,2,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,2,False)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,1,False)
+
+            solve_rotate(moves_queue,cube_copy,3,True)
+            solve_rotate(moves_queue,cube_copy,4,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,4,False)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,3,False)
+
+            solve_rotate(moves_queue,cube_copy,1,True)
+            solve_rotate(moves_queue,cube_copy,2,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,2,False)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,1,False)
+            return
+        elif cubes[0].coordinates[0] != cubes[1].coordinates[0] and cubes[0].coordinates[2] != cubes[1].coordinates[2]:
+            print("L squares")
+            sides = []
+            for cube in cubes:
+                for side in cube.sides_with_colors:
+                    if side != 5:
+                        sides.append(side)
+            sides= [opposite_side(x) for x in sides]
+            if sides[0]>sides[1] or (sides[0]==1 and sides[1] == 4):
+                sides[0],sides[1] = sides[1], sides[0]
+            solve_rotate(moves_queue,cube_copy,sides[0],True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,sides[1],True)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,sides[1],False)
+            solve_rotate(moves_queue,cube_copy,sides[0],False)
+        else:
+            print("Line of squares")
+            for x in cubes[0].sides_with_colors:
+                if x != 5:
+                    front_side = x
+            if front_side == 1: left_side = 4
+            else: left_side = front_side-1
+            solve_rotate(moves_queue,cube_copy,left_side,True)
+            solve_rotate(moves_queue,cube_copy,front_side,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,front_side,False)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,left_side,False)
 
 
 
