@@ -101,6 +101,7 @@ class rubiks_cube():
         self.second_layer(moves_queue,cube_copy)
         self.yellow_cross(moves_queue,cube_copy)
         self.yellow_edges(moves_queue,cube_copy)
+        self.position_yellow_corners(moves_queue,cube_copy)
         self.play_solution(moves_queue)
     
     def play_solution(self, moves, delay=0.4):
@@ -439,7 +440,55 @@ class rubiks_cube():
             if side == 1: side = 4
             else: side = side-1
 
-
+    def position_yellow_corners(self,moves_queue,cube_copy):
+        cubes =[cube_copy[0][0][0],cube_copy[0][0][2],cube_copy[2][0][2],cube_copy[2][0][0]]
+        positions =[(-1,-1,-1),(-1,-1,1),(1,-1,1),(1,-1,-1)]
+        count=0
+        for i in range(len(cubes)):
+            if cubes[i].coordinates == positions[i]:
+                count +=1
+        if count == 4:return
+        if count == 0:
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,1,True)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,3,False)
+            solve_rotate(moves_queue,cube_copy,5,True)
+            solve_rotate(moves_queue,cube_copy,1,False)
+            solve_rotate(moves_queue,cube_copy,5,False)
+            solve_rotate(moves_queue,cube_copy,3,True)
+        
+        for i in range(len(cubes)):
+            if cubes[i].coordinates == positions[i]:
+                correct_cube = cubes[i]
+        sides = []
+        for s in correct_cube.sides_with_colors:
+            if s !=5: sides.append(s)
+        if (sides[0] == 1 and sides[1] == 4) or (sides[0] == 4 and sides[1] == 1): side=1
+        elif sides[0] > sides[1]: side = sides[0]
+        else: side = sides[1]
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,side,True)
+        solve_rotate(moves_queue,cube_copy,5,False)
+        solve_rotate(moves_queue,cube_copy,opposite_side(side),False)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,side,False)
+        solve_rotate(moves_queue,cube_copy,5,False)
+        solve_rotate(moves_queue,cube_copy,opposite_side(side),True)
+        count= 0
+        for i in range(len(cubes)):
+            if cubes[i].coordinates == positions[i]:
+                count +=1
+        if count == 4:
+            return
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,side,True)
+        solve_rotate(moves_queue,cube_copy,5,False)
+        solve_rotate(moves_queue,cube_copy,opposite_side(side),False)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,side,False)
+        solve_rotate(moves_queue,cube_copy,5,False)
+        solve_rotate(moves_queue,cube_copy,opposite_side(side),True)
 
 
     
