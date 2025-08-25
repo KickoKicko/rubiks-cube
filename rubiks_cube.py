@@ -102,6 +102,7 @@ class rubiks_cube():
         self.yellow_cross(moves_queue,cube_copy)
         self.yellow_edges(moves_queue,cube_copy)
         self.position_yellow_corners(moves_queue,cube_copy)
+        self.orient_yellow_corners(moves_queue,cube_copy)
         self.play_solution(moves_queue)
     
     def play_solution(self, moves, delay=0.4):
@@ -489,6 +490,32 @@ class rubiks_cube():
         solve_rotate(moves_queue,cube_copy,side,False)
         solve_rotate(moves_queue,cube_copy,5,False)
         solve_rotate(moves_queue,cube_copy,opposite_side(side),True)
+
+    def orient_yellow_corners(self,moves_queue,cube_copy):
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+        solve_rotate(moves_queue,cube_copy,5,True)
+
+        for i in range(4):
+            corner_pieces=[cube_copy[0][0][0],cube_copy[0][0][2],cube_copy[2][0][2],cube_copy[2][0][0]]
+            if corner_pieces[i].sides_with_colors[5] == color.yellow:
+                solve_rotate(moves_queue,cube_copy,5,True)
+                continue
+            while corner_pieces[i].sides_with_colors[5] != color.yellow:
+                solve_rotate(moves_queue,cube_copy,2,False)
+                solve_rotate(moves_queue,cube_copy,0,False)
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,0,True)
+                solve_rotate(moves_queue,cube_copy,2,False)
+                solve_rotate(moves_queue,cube_copy,0,False)
+                solve_rotate(moves_queue,cube_copy,2,True)
+                solve_rotate(moves_queue,cube_copy,0,True)
+            solve_rotate(moves_queue,cube_copy,5,True)
 
 
     
